@@ -20,14 +20,14 @@ export interface SplashCursorProps {
 }
 
 export default function SplashCursor({
-  SIM_RESOLUTION = 128,
-  DYE_RESOLUTION = 1440,
+  SIM_RESOLUTION = 64,
+  DYE_RESOLUTION = 512,
   CAPTURE_RESOLUTION = 512,
   DENSITY_DISSIPATION = 3.5,
   VELOCITY_DISSIPATION = 2,
   PRESSURE = 0.1,
-  PRESSURE_ITERATIONS = 20,
-  CURL = 16,
+  PRESSURE_ITERATIONS = 10,
+  CURL = 14,
   SPLAT_RADIUS = 0.2,
   SPLAT_FORCE = 6000,
   SHADING = false,
@@ -924,11 +924,38 @@ export default function SplashCursor({
     initFramebuffers()
     let lastUpdateTime = Date.now()
     let colorUpdateTimer = 0.0
+    let isSleeping = false
+    let lastActiveTime = performance.now()
+    let isScrolling = false
+    let scrollTimer: number | null = null
+    let needResize = true
+
+    function notifyActivity() {
+      lastActiveTime = performance.now()
+      if (isSleeping && isActive) {
+        isSleeping = false
+        lastUpdateTime = Date.now()
+        animationFrameId.current = requestAnimationFrame(updateFrame)
+      }
+    }
 
     function updateFrame() {
       if (!isActive) return
+
+      const now = performance.now()
+      // Sleep after 1.8s of no interaction when fluid has dissipated, dropping CPU/GPU to 0%
+      if (now - lastActiveTime > 1800) {
+        render(null)
+        isSleeping = true
+        animationFrameId.current = null
+        return
+      }
+
       const dt = calcDeltaTime()
-      if (resizeCanvas()) initFramebuffers()
+      if (needResize) {
+        if (resizeCanvas()) initFramebuffers()
+        needResize = false
+      }
       updateColors(dt)
       applyInputs()
       step(dt)
@@ -1023,7 +1050,8 @@ export default function SplashCursor({
         velocity.texelSizeY,
       )
       gl.uniform1i(pressureProgram.uniforms.uDivergence, divergence.attach(0))
-      for (let i = 0; i < config.PRESSURE_ITERATIONS; i++) {
+      const pressurePasses = isScrolling ? 3 : config.PRESSURE_ITERATIONS
+      for (let i = 0; i < pressurePasses; i++) {
         gl.uniform1i(
           pressureProgram.uniforms.uPressure,
           pressure.read.attach(1),
@@ -1295,7 +1323,7 @@ export default function SplashCursor({
     }
 
     function scaleByPixelRatio(input: number) {
-      const pixelRatio = window.devicePixelRatio || 1
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.25)
       return Math.floor(input * pixelRatio)
     }
 
@@ -1310,6 +1338,7 @@ export default function SplashCursor({
     }
 
     function handleMouseDown(e: MouseEvent) {
+      notifyActivity()
       const pointer = pointers[0]
       const posX = scaleByPixelRatio(e.clientX)
       const posY = scaleByPixelRatio(e.clientY)
@@ -1319,6 +1348,7 @@ export default function SplashCursor({
 
     let firstMouseMoveHandled = false
     function handleMouseMove(e: MouseEvent) {
+      notifyActivity()
       const pointer = pointers[0]
       const posX = scaleByPixelRatio(e.clientX)
       const posY = scaleByPixelRatio(e.clientY)
@@ -1332,6 +1362,7 @@ export default function SplashCursor({
     }
 
     function handleTouchStart(e: TouchEvent) {
+      notifyActivity()
       const touches = e.targetTouches
       const pointer = pointers[0]
       for (let i = 0; i < touches.length; i++) {
@@ -1342,6 +1373,7 @@ export default function SplashCursor({
     }
 
     function handleTouchMove(e: TouchEvent) {
+      notifyActivity()
       const touches = e.targetTouches
       const pointer = pointers[0]
       for (let i = 0; i < touches.length; i++) {
@@ -1359,11 +1391,26 @@ export default function SplashCursor({
       }
     }
 
+    function onWindowResize() {
+      needResize = true
+      notifyActivity()
+    }
+
+    function onWindowScroll() {
+      isScrolling = true
+      if (scrollTimer) window.clearTimeout(scrollTimer)
+      scrollTimer = window.setTimeout(() => {
+        isScrolling = false
+      }, 100)
+    }
+
     window.addEventListener("mousedown", handleMouseDown)
     window.addEventListener("mousemove", handleMouseMove)
     window.addEventListener("touchstart", handleTouchStart, { passive: true })
     window.addEventListener("touchmove", handleTouchMove, { passive: true })
     window.addEventListener("touchend", handleTouchEnd)
+    window.addEventListener("resize", onWindowResize, { passive: true })
+    window.addEventListener("scroll", onWindowScroll, { passive: true })
 
     updateFrame()
 
@@ -1375,11 +1422,15 @@ export default function SplashCursor({
         animationFrameId.current = null
       }
 
+      if (scrollTimer) window.clearTimeout(scrollTimer)
+
       window.removeEventListener("mousedown", handleMouseDown)
       window.removeEventListener("mousemove", handleMouseMove)
       window.removeEventListener("touchstart", handleTouchStart)
       window.removeEventListener("touchmove", handleTouchMove)
       window.removeEventListener("touchend", handleTouchEnd)
+      window.removeEventListener("resize", onWindowResize)
+      window.removeEventListener("scroll", onWindowScroll)
     }
   }, [
     SIM_RESOLUTION,

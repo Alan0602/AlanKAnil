@@ -71,8 +71,9 @@ button:active,
   bottom: 20px;
   width: 128px;
   border-radius: 64px 20px 64px 20px;
-  background: rgba(248, 248, 253, 0.95);
-  backdrop-filter: blur(12px);
+  background: rgba(248, 248, 253, 0.96);
+  backdrop-filter: blur(8px);
+  contain: paint;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -224,12 +225,10 @@ button:active,
   position: absolute;
   inset: 0;
   z-index: -2;
-  opacity: 0.12;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
-    url('/assets/077a7.png');
-  background-size: cover;
-  background-position: center 30%;
-  filter: blur(2px);
+  opacity: 0.05;
+  background-image: radial-gradient(rgba(21, 21, 25, 0.16) 1px, transparent 0);
+  background-size: 28px 28px;
+  pointer-events: none;
 }
 
 /* TOPBAR */

@@ -353,9 +353,12 @@ export default function App() {
 
   return (
     <main className="portfolio-shell">
-      {/* Interactive WebGL Fluid Splash Cursor - Theme Orange */}
+      {/* Interactive WebGL Fluid Splash Cursor - Theme Orange (Optimized) */}
       <SplashCursor
-        CURL={16}
+        SIM_RESOLUTION={64}
+        DYE_RESOLUTION={512}
+        PRESSURE_ITERATIONS={10}
+        CURL={14}
         COLOR_UPDATE_SPEED={15}
         SHADING={false}
         RAINBOW_MODE={false}
@@ -625,6 +628,7 @@ export default function App() {
             }}
           >
             <LaserFlow
+              dpr={1}
               horizontalBeamOffset={0.1}
               verticalBeamOffset={0.0}
               color="#d53831"

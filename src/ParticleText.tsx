@@ -209,7 +209,13 @@ export default function ParticleText({
       ctx.fill()
     }
 
+    let inView = true
+
     const render = (now: number) => {
+      if (!inView) {
+        animationFrame = null
+        return
+      }
       ctx.clearRect(0, 0, width, height)
 
       if (glow && !reducedMotion) {
@@ -298,7 +304,7 @@ export default function ParticleText({
 
       if (width <= 0 || height <= 0) return
 
-      dpr = Math.min(window.devicePixelRatio || 1, 2)
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5)
       canvas.width = Math.max(1, Math.floor(width * dpr))
       canvas.height = Math.max(1, Math.floor(height * dpr))
       canvas.style.width = "100%"
@@ -479,8 +485,8 @@ export default function ParticleText({
       }
 
       const maxParticles = Math.max(
-        900,
-        Math.min(5200, Math.floor((width * height) / 90)),
+        600,
+        Math.min(1800, Math.floor((width * height) / 120)),
       )
       const stride = Math.max(1, Math.ceil(targets.length / maxParticles))
       const baseRgb = hexToRgb(color)
@@ -583,10 +589,26 @@ export default function ParticleText({
 
     const resizeObserver = new ResizeObserver(queueSample)
     resizeObserver.observe(container)
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting
+        if (inView) {
+          ensureRenderLoop()
+        } else if (animationFrame !== null) {
+          window.cancelAnimationFrame(animationFrame)
+          animationFrame = null
+        }
+      },
+      { threshold: 0.05 },
+    )
+    io.observe(container)
+
     sampleText()
 
     return () => {
       buildId += 1
+      io.disconnect()
       resizeObserver.disconnect()
       reduceMotionQuery?.removeEventListener("change", handleReduceMotionChange)
       canvas.removeEventListener("pointerenter", handlePointerEnter)
