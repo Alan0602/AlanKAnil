@@ -34,7 +34,7 @@ export default function SplashCursor({
   COLOR_UPDATE_SPEED = 15,
   BACK_COLOR = { r: 0.5, g: 0, b: 0 },
   TRANSPARENT = true,
-  RAINBOW_MODE = true,
+  RAINBOW_MODE = false,
   COLOR = "#d53831",
 }: SplashCursorProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -448,7 +448,9 @@ export default function SplashCursor({
               c *= diffuse;
           #endif
 
-          float a = max(c.r, max(c.g, c.b));
+          vec4 dyeData = texture2D(uTexture, vUv);
+          float brightness = max(c.r, max(c.g, c.b));
+          float a = clamp(max(brightness, dyeData.a * 0.75), 0.0, 1.0);
           gl_FragColor = vec4(c, a);
       }
     `
@@ -468,9 +470,10 @@ export default function SplashCursor({
         void main () {
             vec2 p = vUv - point.xy;
             p.x *= aspectRatio;
-            vec3 splat = exp(-dot(p, p) / radius) * color;
-            vec3 base = texture2D(uTarget, vUv).xyz;
-            gl_FragColor = vec4(base + splat, 1.0);
+            float splat = exp(-dot(p, p) / radius);
+            vec3 splatColor = splat * color;
+            vec4 base = texture2D(uTarget, vUv);
+            gl_FragColor = vec4(base.rgb + splatColor, base.a + splat * 0.85);
         }
       `,
     )
@@ -1221,15 +1224,33 @@ export default function SplashCursor({
       return { r: r * 0.15, g: g * 0.15, b: b * 0.15 }
     }
 
+    const THEME_COLORS = [
+      { r: 0.98, g: 0.4, b: 0.08 }, // Vibrant Electric Orange (#fa6614)
+      { r: 0.04, g: 0.04, b: 0.06 }, // Deep Ink Black (#151519)
+      { r: 0.9, g: 0.26, b: 0.14 }, // Signature Theme Red-Orange (#d53831)
+      { r: 0.03, g: 0.03, b: 0.05 }, // Midnight Black (#0d0d12)
+      { r: 1.0, g: 0.52, b: 0.16 }, // Warm Amber Orange (#ff8529)
+      { r: 0.06, g: 0.06, b: 0.08 }, // Smoky Charcoal Ink (#1a1a24)
+    ]
+    let colorIndex = 0
+
     function generateColor() {
-      if (!config.RAINBOW_MODE) {
-        return hexToRGB(config.COLOR)
+      if (config.RAINBOW_MODE) {
+        const c = HSVtoRGB(Math.random(), 1.0, 1.0)
+        c.r *= 0.15
+        c.g *= 0.15
+        c.b *= 0.15
+        return c
       }
-      const c = HSVtoRGB(Math.random(), 1.0, 1.0)
-      c.r *= 0.15
-      c.g *= 0.15
-      c.b *= 0.15
-      return c
+
+      // Portfolio theme mode: alternates between signature orange and deep ink black
+      const picked = THEME_COLORS[colorIndex % THEME_COLORS.length]
+      colorIndex++
+      return {
+        r: picked.r * 0.18,
+        g: picked.g * 0.18,
+        b: picked.b * 0.18,
+      }
     }
 
     function HSVtoRGB(h: number, s: number, v: number) {
