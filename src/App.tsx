@@ -353,12 +353,13 @@ export default function App() {
 
   return (
     <main className="portfolio-shell">
-      {/* Interactive WebGL Fluid Splash Cursor in Portfolio Theme (Black & Orange) */}
+      {/* Interactive WebGL Fluid Splash Cursor - Theme Orange */}
       <SplashCursor
         CURL={16}
         COLOR_UPDATE_SPEED={15}
         SHADING={false}
         RAINBOW_MODE={false}
+        COLOR="#ff6b00"
       />
 
       {/* Side Rail Navigation */}
