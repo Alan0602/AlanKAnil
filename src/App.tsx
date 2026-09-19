@@ -1,5 +1,6 @@
 import { useState, useRef } from "react"
 import LaserFlow from "./LaserFlow"
+import SplashCursor from "./SplashCursor"
 
 const asset = "/assets"
 
@@ -351,6 +352,14 @@ export default function App() {
 
   return (
     <main className="portfolio-shell">
+      {/* Interactive WebGL Fluid Splash Cursor from React Bits */}
+      <SplashCursor
+        CURL={16}
+        COLOR_UPDATE_SPEED={15}
+        SHADING={false}
+        RAINBOW_MODE
+      />
+
       {/* Side Rail Navigation */}
       <aside className="side-rail">
         <a className="rail-mark" href="#home" aria-label="Alan K Anil home">
