@@ -1,6 +1,7 @@
 import { useState, useRef } from "react"
 import LaserFlow from "./LaserFlow"
 import SplashCursor from "./SplashCursor"
+import ParticleText from "./ParticleText"
 
 const asset = "/assets"
 
@@ -442,10 +443,35 @@ export default function App() {
             <p className="hero-kicker">
               <span /> Software Engineer · 2 Years Experience at Coolminds
             </p>
-            <h1>
-              Alan
-              <br />
-              <i>K</i> Anil.
+            <h1 className="hero-particle-heading" aria-label="Alan K Anil.">
+              <ParticleText
+                lines={[
+                  [{ text: "Alan", color: "#151519" }],
+                  [
+                    { text: "K", color: "#d53831" },
+                    { text: " Anil.", color: "#151519" },
+                  ],
+                ]}
+                fontSize="clamp(60px, 8.4vw, 134px)"
+                fontWeight={500}
+                fontFamily="'Outfit:Medium', 'Outfit', sans-serif"
+                letterSpacing="-0.08em"
+                lineHeight={0.78}
+                textAlign="left"
+                verticalAlign="top"
+                particleSize={2.2}
+                density={3.2}
+                color="#151519"
+                highlightColor="#d53831"
+                scatter={140}
+                gatherDuration={1500}
+                stagger={360}
+                pointerRepel={38}
+                repelRadius={120}
+                idleDrift={0.65}
+                trigger="hover"
+                glow={false}
+              />
             </h1>
             <p className="hero-intro">
               Frontend-focused engineer with{" "}

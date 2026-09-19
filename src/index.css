@@ -346,13 +346,28 @@ button:active,
   background: var(--red);
 }
 
-.hero-copy h1 {
+.hero-copy h1,
+.hero-particle-heading {
   margin: 18px 0;
   font-family: 'Outfit:Medium', sans-serif;
   font-weight: 500;
   letter-spacing: -0.08em;
   font-size: clamp(60px, 8.4vw, 134px);
   line-height: 0.78;
+}
+
+.hero-particle-heading {
+  width: 100%;
+  max-width: 680px;
+  height: clamp(105px, 14.5vw, 225px);
+  position: relative;
+  display: block;
+}
+
+.hero-particle-heading .particle-text {
+  min-height: unset;
+  height: 100%;
+  width: 100%;
 }
 
 .hero-copy h1 i,
@@ -1912,8 +1927,12 @@ button:active,
     padding: 20px 24px 140px;
     gap: 28px;
   }
-  .hero-copy h1 {
+  .hero-copy h1,
+  .hero-particle-heading {
     font-size: 72px;
+  }
+  .hero-particle-heading {
+    height: 120px;
   }
   .hero-intro {
     font-size: 14px;
