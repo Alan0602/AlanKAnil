@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
+import LaserFlow from "./LaserFlow"
 
 const asset = "/assets"
 
@@ -322,6 +323,7 @@ export default function App() {
     useState<"all" | "mobile" | "web" | "ai">("all")
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [copied, setCopied] = useState(false)
+  const revealImgRef = useRef<HTMLImageElement>(null)
 
   const scrollTo = (id: string) => {
     setActive(id)
@@ -358,9 +360,10 @@ export default function App() {
           {[
             ["home", "⌂", "Home"],
             ["enterprise", "⚡", "Enterprise"],
-            ["work", "✦", "Projects"],
+            ["spotlight", "✦", "Spotlight"],
+            ["work", "◈", "Projects"],
             ["skills", "⎇", "Skills"],
-            ["experience", "◈", "Experience"],
+            ["experience", "◉", "Experience"],
             ["about", "◎", "About & Education"],
             ["contact", "↗", "Contact"],
           ].map(([id, icon, label]) => (
@@ -557,6 +560,102 @@ export default function App() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* 2.5. INTERACTIVE LASER FLOW SPOTLIGHT */}
+        <section
+          id="spotlight"
+          className="laser-spotlight-section section-anchor"
+        >
+          <div
+            className="laser-spotlight-container"
+            onMouseMove={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect()
+              const x = e.clientX - rect.left
+              const y = e.clientY - rect.top
+              const el = revealImgRef.current
+              if (el) {
+                el.style.setProperty("--mx", `${x}px`)
+                el.style.setProperty("--my", `${y + rect.height * 0.35}px`)
+              }
+            }}
+            onMouseLeave={() => {
+              const el = revealImgRef.current
+              if (el) {
+                el.style.setProperty("--mx", "-9999px")
+                el.style.setProperty("--my", "-9999px")
+              }
+            }}
+          >
+            <LaserFlow
+              horizontalBeamOffset={0.1}
+              verticalBeamOffset={0.0}
+              color="#d53831"
+              backgroundColor="#120F17"
+              horizontalSizing={0.5}
+              verticalSizing={2}
+              wispDensity={1}
+              wispSpeed={15}
+              wispIntensity={5}
+              flowSpeed={0.35}
+              flowStrength={0.25}
+              fogIntensity={0.45}
+              fogScale={0.3}
+              fogFallSpeed={0.6}
+              decay={1.1}
+              falloffStart={1.2}
+            />
+
+            <div className="laser-spotlight-card">
+              <span className="spotlight-eyebrow">
+                Interactive Spotlight · Coolminds Technologies
+              </span>
+              <h3>High-Velocity Code. Calm, Considered Products.</h3>
+              <p>
+                2 years engineering internal enterprise suites at Infopark
+                Kakkanad, pairing Flutter mobile architectures and Next.js web
+                systems with AI automation.
+              </p>
+              <div className="spotlight-chips">
+                <span className="spotlight-chip">⚡ Flutter Enterprise</span>
+                <span className="spotlight-chip">🌐 Next.js & React</span>
+                <span className="spotlight-chip">🤖 AI & OCR Integration</span>
+                <span className="spotlight-chip">🎓 M.Tech CSE @ KMEA</span>
+              </div>
+              <div className="spotlight-hint">
+                <span>
+                  ✦ Move cursor across the canvas to interact with the laser &
+                  reveal the architect
+                </span>
+              </div>
+            </div>
+
+            <img
+              ref={revealImgRef}
+              src={`${asset}/hero-portrait.jpeg`}
+              alt="Alan K Anil interactive portrait"
+              className="laser-reveal-image"
+              style={{
+                position: "absolute",
+                width: "100%",
+                top: "-30%",
+                zIndex: 5,
+                mixBlendMode: "lighten",
+                opacity: 0.38,
+                pointerEvents: "none",
+                WebkitMaskImage:
+                  "radial-gradient(circle at var(--mx, -9999px) var(--my, -9999px), rgba(255,255,255,1) 0px, rgba(255,255,255,0.95) 60px, rgba(255,255,255,0.6) 120px, rgba(255,255,255,0.25) 180px, rgba(255,255,255,0) 240px)",
+                maskImage:
+                  "radial-gradient(circle at var(--mx, -9999px) var(--my, -9999px), rgba(255,255,255,1) 0px, rgba(255,255,255,0.95) 60px, rgba(255,255,255,0.6) 120px, rgba(255,255,255,0.25) 180px, rgba(255,255,255,0) 240px)",
+                WebkitMaskRepeat: "no-repeat",
+                maskRepeat: "no-repeat",
+                ...{
+                  "--mx": "-9999px",
+                  "--my": "-9999px",
+                } as React.CSSProperties,
+              }}
+            />
           </div>
         </section>
 
