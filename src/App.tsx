@@ -298,7 +298,7 @@ const skillCategories = [
       "VS Code",
       "Antigravity",
       "Stitch",
-      "gitat",
+      
     ],
   },
   {
